@@ -82,7 +82,7 @@ __global__ void move_gpu (particle_t * particles, int n, double size)
 int main( int argc, char **argv )
 {    
     // This takes a few seconds to initialize the runtime
-    cudaThreadSynchronize(); 
+    //cudaThreadSynchronize(); 
 
     if( find_option( argc, argv, "-h" ) >= 0 )
     {
