@@ -226,7 +226,7 @@ int main( int argc, char **argv )
     printf( "CPU-GPU copy time = %g seconds\n", copy_time);
     printf( "n = %d, simulation time = %g seconds\n", n, simulation_time );
     
-    free( pacrticles );
+    free(particles);
     cudaFree(d_particles);
     if( fsave )
         fclose( fsave );
