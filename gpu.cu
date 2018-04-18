@@ -98,19 +98,19 @@ __global__ void assign_bins_gpu(particle_t * particles, int * bins, int * counts
 	int new_c = atomicAdd(&c(x, y, bs), 1);
 	b(x, y, new_c, bs) = tid;
 }
-__global__ void compute_forces_bin_gpu(particle_t * particles, int bs, int * bins,
-	int * counts)
-{
-	int id = threadIdx.x + blockIdx.x * blockDim.x;
-	if (id >= bs * bs) return; // return if out of bounds
-	int bx = id % bs; // get the x bin position
-	int by = id / bs; // get the y bin position
-	int nx, ny;
-
-	particles[tid].ax = particles[tid].ay = 0;
-	for (int j = 0; j < n; j++)
-		apply_force_gpu(particles[tid], particles[j]);
-}
+//__global__ void compute_forces_bin_gpu(particle_t * particles, int bs, int * bins,
+//	int * counts)
+//{
+//	int id = threadIdx.x + blockIdx.x * blockDim.x;
+//	if (id >= bs * bs) return; // return if out of bounds
+//	int bx = id % bs; // get the x bin position
+//	int by = id / bs; // get the y bin position
+//	int nx, ny;
+//
+//	particles[tid].ax = particles[tid].ay = 0;
+//	for (int j = 0; j < n; j++)
+//		apply_force_gpu(particles[tid], particles[j]);
+//}
 
 int main( int argc, char **argv )
 {    
