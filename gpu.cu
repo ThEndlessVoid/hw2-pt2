@@ -107,8 +107,9 @@ __global__ void compute_forces_bin_gpu(particle_t * particles, int bs, int * bin
 	int bx = id % bs; // get the x bin position
 	int by = id / bs; // get the y bin position
 	int nx, ny;
-
-	// Itterate through all the particles in the bin
+	//cloaring the accelaration
+	particles[id].ax = particles[id].ay = 0;
+	// Iterate through all the particles in the bin
 	for (int j = id; j < id + bs; j++) {
 		// make sure you dont apply force on yourself
 		if (id != j) {
@@ -189,19 +190,20 @@ int main( int argc, char **argv )
 
 
 		// Assign bins
-		assign_bins_gpu << < blks, num_threads >> > (d_particles, d_bins, d_counts, n, bs);
+		int blks = (n + NUM_THREADS - 1) / NUM_THREADS;
+		assign_bins_gpu << < blks, NUM_THREADS >> > (d_particles, bins, counts, n, bs);
 		//No clue what this is (I think we are stoping the acceleration?)
-		clear_accel_gpu << < blks, num_threads >> > (d_particles, n);
+		//clear_accel_gpu << < blks, num_threads >> > (d_particles, n);
 		//Compute Forces
 		int bin_blks = (bs*bs + num_threads - 1) / num_threads;
-		compute_forces_bin_gpu << < bin_blks, num_threads >> > (d_particles, bs, d_bins, d_counts);
+		compute_forces_bin_gpu << < bin_blks, num_threads >> > (d_particles, bs, bins, counts);
 
 
         //
         //  compute forces (Original Code)
         //
 
-		int blks = (n + NUM_THREADS - 1) / NUM_THREADS;
+		
 		//compute_forces_gpu <<< blks, NUM_THREADS >>> (d_particles, n);
         
         //
