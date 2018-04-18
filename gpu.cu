@@ -5,13 +5,13 @@
 #include <cuda.h>
 #include "common.h"
 
-#define NUM_THREADS 256
+#define NUM_THREADS 512
 #define b(x, y, p, n) (bins[(x)+(y)*(n)+(p)*(n)*(n)])
 #define c(x, y, n) (counts[(x)+(y)*(n)]) // check if there are particles in a bin
 
 int bs; // bin size
 int np; // max particles per bin
-
+int n; //number of particles
 int* bins;
 int* counts;
 
@@ -98,19 +98,20 @@ __global__ void assign_bins_gpu(particle_t * particles, int * bins, int * counts
 	int new_c = atomicAdd(&c(x, y, bs), 1);
 	b(x, y, new_c, bs) = tid;
 }
-//__global__ void compute_forces_bin_gpu(particle_t * particles, int bs, int * bins,
-//	int * counts)
-//{
-//	int id = threadIdx.x + blockIdx.x * blockDim.x;
-//	if (id >= bs * bs) return; // return if out of bounds
-//	int bx = id % bs; // get the x bin position
-//	int by = id / bs; // get the y bin position
-//	int nx, ny;
-//
-//	particles[tid].ax = particles[tid].ay = 0;
-//	for (int j = 0; j < n; j++)
-//		apply_force_gpu(particles[tid], particles[j]);
-//}
+__global__ void compute_forces_bin_gpu(particle_t * particles, int bs, int * bins,
+	int * counts)
+{
+	//int tid = threadIdx.x + blockIdx.x * blockDim.x;
+	int id = threadIdx.x + blockIdx.x * blockDim.x;
+	if (id >= bs * bs) return; // return if out of bounds
+	int bx = id % bs; // get the x bin position
+	int by = id / bs; // get the y bin position
+	int nx, ny;
+
+	particles[id].ax = particles[id].ay = 0;
+	for (int j = 0; j < n; j++)
+		apply_force_gpu(particles[id], particles[j]);
+}
 
 int main( int argc, char **argv )
 {    
@@ -127,7 +128,7 @@ int main( int argc, char **argv )
     }
 
     
-    int n = read_int( argc, argv, "-n", 1000 );
+    n = read_int( argc, argv, "-n", 1000 );
 
     char *savename = read_string( argc, argv, "-o", NULL );
     
