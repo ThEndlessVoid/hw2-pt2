@@ -196,7 +196,7 @@ int main( int argc, char **argv )
 		//clear_accel_gpu << < blks, num_threads >> > (d_particles, n);
 		//Compute Forces
 		int bin_blks = (bs*bs + NUM_THREADS - 1) / NUM_THREADS;
-		compute_forces_bin_gpu << < bin_blks, num_threads >> > (d_particles, bs, bins, counts);
+		compute_forces_bin_gpu << < bin_blks, NUM_THREADS >> > (d_particles, bs, bins, counts);
 
 
         //
