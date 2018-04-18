@@ -108,9 +108,9 @@ __global__ void compute_forces_bin_gpu(particle_t * particles, int bs, int * bin
 	int by = id / bs; // get the y bin position
 	int nx, ny;
 
-	particles[id].ax = particles[id].ay = 0;
-	for (int j = 0; j < n; j++)
-		apply_force_gpu(particles[id], particles[j]);
+	//particles[id].ax = particles[id].ay = 0;
+	//for (int j = 0; j < n; j++)
+	//	apply_force_gpu(particles[id], particles[j]);
 }
 
 int main( int argc, char **argv )
