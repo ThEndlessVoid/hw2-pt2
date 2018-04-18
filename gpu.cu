@@ -5,7 +5,7 @@
 #include <cuda.h>
 #include "common.h"
 
-#define NUM_THREADS 512
+#define NUM_THREADS 256
 #define b(x, y, p, n) (bins[(x)+(y)*(n)+(p)*(n)*(n)])
 #define c(x, y, n) (counts[(x)+(y)*(n)]) // check if there are particles in a bin
 
@@ -108,6 +108,16 @@ __global__ void compute_forces_bin_gpu(particle_t * particles, int bs, int * bin
 	int by = id / bs; // get the y bin position
 	int nx, ny;
 
+	// Itterate through all the particles in the bin
+	for (int j = id; j < id + bs; j++) {
+		// make sure you dont apply force on yourself
+		if (id != j) {
+			apply_force_gpu(particles[id], particles[id]);
+		}
+		
+	}
+		
+
 	//particles[id].ax = particles[id].ay = 0;
 	//for (int j = 0; j < n; j++)
 	//	apply_force_gpu(particles[id], particles[j]);
@@ -179,12 +189,12 @@ int main( int argc, char **argv )
 
 
 		// Assign bins
-		//assign_bins_gpu << < blks, num_threads >> > (d_particles, d_bins, d_counts, n, bs);
+		assign_bins_gpu << < blks, num_threads >> > (d_particles, d_bins, d_counts, n, bs);
 		//No clue what this is (I think we are stoping the acceleration?)
-		//clear_accel_gpu << < blks, num_threads >> > (d_particles, n);
+		clear_accel_gpu << < blks, num_threads >> > (d_particles, n);
 		//Compute Forces
-		//int bin_blks = (bs*bs + num_threads - 1) / num_threads;
-		//compute_forces_bin_gpu << < bin_blks, num_threads >> > (d_particles, bs, d_bins, d_counts);
+		int bin_blks = (bs*bs + num_threads - 1) / num_threads;
+		compute_forces_bin_gpu << < bin_blks, num_threads >> > (d_particles, bs, d_bins, d_counts);
 
 
         //
@@ -192,7 +202,7 @@ int main( int argc, char **argv )
         //
 
 		int blks = (n + NUM_THREADS - 1) / NUM_THREADS;
-		compute_forces_gpu <<< blks, NUM_THREADS >>> (d_particles, n);
+		//compute_forces_gpu <<< blks, NUM_THREADS >>> (d_particles, n);
         
         //
         //  move particles
@@ -214,7 +224,7 @@ int main( int argc, char **argv )
     printf( "CPU-GPU copy time = %g seconds\n", copy_time);
     printf( "n = %d, simulation time = %g seconds\n", n, simulation_time );
     
-    free( particles );
+    free( pacrticles );
     cudaFree(d_particles);
     if( fsave )
         fclose( fsave );
