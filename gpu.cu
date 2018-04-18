@@ -195,7 +195,7 @@ int main( int argc, char **argv )
 		//No clue what this is (I think we are stoping the acceleration?)
 		//clear_accel_gpu << < blks, num_threads >> > (d_particles, n);
 		//Compute Forces
-		int bin_blks = (bs*bs + num_threads - 1) / num_threads;
+		int bin_blks = (bs*bs + NUM_THREADS - 1) / NUM_THREADS;
 		compute_forces_bin_gpu << < bin_blks, num_threads >> > (d_particles, bs, bins, counts);
 
 
